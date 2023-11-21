@@ -2,6 +2,7 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
+using Ugolek.Backend.Web.Services;
 using ugolekback;
 using ugolekback.Coals.Model;
 using ugolekback.Core;
@@ -26,13 +27,13 @@ builder.Services.AddSwaggerGen(c => {
 { // Register Other Services
     builder.Services.AddScoped<IEmailSender, EmailSender>();
 
-    builder.Services.AddScoped<IVerificationCodeGenerator, VerificationCodeGenerator>();
-
     builder.Services.AddMemoryCache();
 }
 
 { // Register Feature Services
     builder.Services.AddScoped<CustomerService>();
+
+    builder.Services.AddScoped<ICustomerVerificationCodePersister, CustomerVerificationCodePersister>();
 }
 
 { // Register Persistence Services
@@ -82,12 +83,18 @@ app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoalStore
 
     app.MapPost("/customers/verification", (
         [FromBody] CustomerVerifyRequest req,
-        CustomerService services
+        CustomerVerificationCodePersister verification,
+        IRepository<Customer> customers
     ) =>
     {
-        if (services.CheckCode(req))
+        Customer? customer = customers.GetCustomerByEmail(req.Address);
+        if (customer != null)
         {
-            return Results.Ok();
+            if (verification.VerifyCustomerCode(customer.Id, req.Code))
+            {
+                return Results.Ok();
+            }
+            return Results.BadRequest();
         }
         return Results.BadRequest();
     });
