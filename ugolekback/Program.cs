@@ -9,7 +9,6 @@ using ugolekback.Core;
 using ugolekback.CustomerF;
 using ugolekback.EmailF;
 using ugolekback.OrderF;
-using ugolekback.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,14 +25,12 @@ builder.Services.AddSwaggerGen(c => {
 
 { // Register Other Services
     builder.Services.AddScoped<IEmailSender, EmailSender>();
-
+    builder.Services.AddScoped<ICustomerVerificationCodePersister, CustomerVerificationCodePersister>();
     builder.Services.AddMemoryCache();
 }
 
 { // Register Feature Services
     builder.Services.AddScoped<CustomerService>();
-
-    builder.Services.AddScoped<ICustomerVerificationCodePersister, CustomerVerificationCodePersister>();
 }
 
 { // Register Persistence Services
@@ -83,7 +80,7 @@ app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoalStore
 
     app.MapPost("/customers/verification", (
         [FromBody] CustomerVerifyRequest req,
-        CustomerVerificationCodePersister verification,
+        ICustomerVerificationCodePersister verification,
         IRepository<Customer> customers
     ) =>
     {

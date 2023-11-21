@@ -1,10 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
-using Org.BouncyCastle.Ocsp;
 using ugolekback.Core;
 using ugolekback.CustomerF;
-using ugolekback.EmailF;
-using ugolekback.Services;
-using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
+
 
 namespace Ugolek.Backend.Web.Services
 {
@@ -42,7 +39,7 @@ namespace Ugolek.Backend.Web.Services
             CustomerVerificationInfo verificationInfo = new() { VerificationCode = newCode, CustomerId = customerId };
             string key = MakeKey(customerId);
             var cacheEntryOptions = new MemoryCacheEntryOptions()
-                .SetAbsoluteExpiration(TimeSpan.FromMinutes(2));
+                .SetAbsoluteExpiration(TimeSpan.FromMinutes(1));
             memoryCache.Set(key, verificationInfo, cacheEntryOptions);
             return (newCode);
         }

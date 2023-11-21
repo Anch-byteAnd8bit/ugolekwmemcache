@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Caching.Memory;
-using System.Net.Mail;
+﻿using Microsoft.Extensions.Caching.Memory;
 using Ugolek.Backend.Web.Services;
 using ugolekback.Core;
 using ugolekback.EmailF;
-using ugolekback.Services;
 
 namespace ugolekback.CustomerF;
 
