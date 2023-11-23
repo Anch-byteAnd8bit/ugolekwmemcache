@@ -39,7 +39,7 @@ namespace Ugolek.Backend.Web.Services
             CustomerVerificationInfo verificationInfo = new() { VerificationCode = newCode, CustomerId = customerId };
             string key = MakeKey(customerId);
             var cacheEntryOptions = new MemoryCacheEntryOptions()
-                .SetAbsoluteExpiration(TimeSpan.FromMinutes(1));
+                .SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
             memoryCache.Set(key, verificationInfo, cacheEntryOptions);
             return (newCode);
         }

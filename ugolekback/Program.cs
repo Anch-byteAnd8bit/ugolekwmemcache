@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Ugolek.Backend.Web.Services;
 using ugolekback;
@@ -12,8 +14,35 @@ using ugolekback.OrderF;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddAuthorization();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        //options.TokenValidationParameters = new TokenValidationParameters
+        //{
+        //    // указывает, будет ли валидироваться издатель при валидации токена
+        //    ValidateIssuer = true,
+        //    // строка, представляющая издателя
+        //    ValidIssuer = TokenServiceOptions.ISSUER,
+        //    // будет ли валидироваться потребитель токена
+        //    ValidateAudience = true,
+        //    // установка потребителя токена
+        //    ValidAudience = TokenServiceOptions.AUDIENCE,
+        //    // будет ли валидироваться время существования
+        //    ValidateLifetime = true,
+        //    // установка ключа безопасности
+        //    IssuerSigningKey = CustomerToken.GetSymmetricSecurityKey(),
+        //    // валидация ключа безопасности
+        //    ValidateIssuerSigningKey = true,
+        //};
+    });
+
 builder.Services.AddOptions<EmailServiceOptions>()
     .BindConfiguration("EmailService");
+builder.Services.AddOptions<TokenServiceOptions>()
+    .BindConfiguration("TokenService");
+
 
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
@@ -26,6 +55,7 @@ builder.Services.AddSwaggerGen(c => {
 { // Register Other Services
     builder.Services.AddScoped<IEmailSender, EmailSender>();
     builder.Services.AddScoped<ICustomerVerificationCodePersister, CustomerVerificationCodePersister>();
+    builder.Services.AddScoped<ICustomerToken, CustomerToken>();
     builder.Services.AddMemoryCache();
 }
 
@@ -81,6 +111,7 @@ app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoalStore
     app.MapPost("/customers/verification", (
         [FromBody] CustomerVerifyRequest req,
         ICustomerVerificationCodePersister verification,
+        ICustomerToken customerToken,
         IRepository<Customer> customers
     ) =>
     {
@@ -89,7 +120,7 @@ app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoalStore
         {
             if (verification.VerifyCustomerCode(customer.Id, req.Code))
             {
-                return Results.Ok();
+                return Results.Ok(customerToken.GenerateToken(req.Address));
             }
             return Results.BadRequest();
         }

@@ -6,3 +6,4 @@ public class EmailServiceOptions
 
     public required int Port { get; init; }
 }
+
