@@ -1,6 +1,14 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.IO;
+using System.Reflection;
+using System.Security.Claims;
+using System.Text;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -17,26 +25,22 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAuthorization();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        //options.TokenValidationParameters = new TokenValidationParameters
-        //{
-        //    // указывает, будет ли валидироваться издатель при валидации токена
-        //    ValidateIssuer = true,
-        //    // строка, представляющая издателя
-        //    ValidIssuer = TokenServiceOptions.ISSUER,
-        //    // будет ли валидироваться потребитель токена
-        //    ValidateAudience = true,
-        //    // установка потребителя токена
-        //    ValidAudience = TokenServiceOptions.AUDIENCE,
-        //    // будет ли валидироваться время существования
-        //    ValidateLifetime = true,
-        //    // установка ключа безопасности
-        //    IssuerSigningKey = CustomerToken.GetSymmetricSecurityKey(),
-        //    // валидация ключа безопасности
-        //    ValidateIssuerSigningKey = true,
-        //};
-    });
+.AddJwtBearer(options => builder.Configuration.Bind("TokenService", options));
+
+//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//    .AddJwtBearer(options =>
+//    {
+//        options.TokenValidationParameters = new TokenValidationParameters
+//        {
+//            ValidateIssuer = true,
+//            ValidIssuer = "AuServer",
+//            ValidateAudience = true,
+//            ValidAudience = "AuClient",
+//            ValidateLifetime = true,
+//            IssuerSigningKey = GetSymmetricSecurityKey(),
+//            ValidateIssuerSigningKey = true,
+//        };
+//    });
 
 builder.Services.AddOptions<EmailServiceOptions>()
     .BindConfiguration("EmailService");
@@ -61,6 +65,7 @@ builder.Services.AddSwaggerGen(c => {
 
 { // Register Feature Services
     builder.Services.AddScoped<CustomerService>();
+    builder.Services.AddScoped<OrderService>();
 }
 
 { // Register Persistence Services
@@ -75,8 +80,8 @@ builder.Services.AddSwaggerGen(c => {
         new() { Id = 2, Email = "sample2@foo.bar", City = "Абаза", Street = "Кирова", House = "112" },
         new() { Id = 3, Email = "sample3@foo.bar", City = "Сорск", Street = "Кирова", House = "1" }
     }));
-
-    builder.Services.AddSingleton<IRepository<Order>, BaseInMemRepository<Order>>();
+    builder.Services.AddSingleton<IRepository<OrderItem>>(new BaseInMemRepository<OrderItem>(new List<OrderItem> {}));
+    builder.Services.AddSingleton<IRepository<Order>>(new BaseInMemRepository<Order>(new List<Order> {}));
 }
 
 var app = builder.Build();
@@ -126,7 +131,29 @@ app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoalStore
         }
         return Results.BadRequest();
     });
+
+    app.MapPost("/customers/orders", (
+        [FromBody] CustomerOrderReq req,
+        OrderService orderService,
+        ICustomerToken customerToken,
+        IRepository<Customer> customers
+    ) =>
+    {
+        //добавить что-то с токеном чб находить пользователя чб разрешать ему заказывать? 
+        Customer? customer = customers.GetCustomerById(1); // переделать
+        if (customer != null)
+        {
+            orderService.GetAddress(customer.Id, req.settlement, req.street, req.house);
+            orderService.AddOrder(req.OrderItems, customer);
+            return Results.Ok();
+
+        }
+        return Results.BadRequest();
+    });
 }
+
+//app.MapGet("/testjwt", [Authorize] () => new { message = "Hello World!" });
+
 
 app.Run();
 
@@ -146,3 +173,4 @@ public class CustomerVerifyRequest {
 
     public string Code { get; init; }
 }
+

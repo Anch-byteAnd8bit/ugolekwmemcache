@@ -14,6 +14,11 @@ public class BaseInMemRepository<T> : IRepository<T> where T : class, IEntity {
     public T? GetById(long id) {
         return entites.SingleOrDefault(x => x.Id == id);
     }
+    public long GetLastId()
+    {
+        if (entites.Count == 0) { return 0; }
+        return entites.Last<T>().Id;
+    }
 
     public ICollection<T> GetMany() {
         return entites;

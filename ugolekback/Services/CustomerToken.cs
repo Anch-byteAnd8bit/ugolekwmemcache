@@ -36,11 +36,12 @@ namespace Ugolek.Backend.Web.Services
             var jwt = new JwtSecurityToken(
                     issuer: options.ISSUER,
                     audience: options.AUDIENCE,
-            claims: claims,
-            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(10)), 
+                    claims: claims,
+                    expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(10)), 
                     signingCredentials: new SigningCredentials(GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
 
             return new JwtSecurityTokenHandler().WriteToken(jwt);
+
         }
     }
 }

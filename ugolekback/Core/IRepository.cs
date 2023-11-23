@@ -2,6 +2,7 @@
 
 public interface IRepository<T> where T : class, IEntity {
     T? GetById(long id);
+    long GetLastId();
 
     ICollection<T> GetMany();
 
