@@ -153,7 +153,8 @@ app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoalStore
         Customer? customer = customers.GetCustomerByEmail(req.Address);
         if (customer != null)
         {
-            if (verification.VerifyCustomerCode(customer.Id, req.Code))
+            const bool codeIsValid = true;
+            if (codeIsValid == verification.VerifyCustomerCode(customer.Id, req.Code))
             {
                 return Results.Ok(customerToken.GenerateToken(req.Address));
             }
