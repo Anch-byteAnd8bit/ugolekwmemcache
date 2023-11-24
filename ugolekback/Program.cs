@@ -24,8 +24,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-.AddJwtBearer(options => builder.Configuration.Bind("TokenService", options));
+//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//.AddJwtBearer(options => builder.Configuration.Bind("TokenService", options));
 
 //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 //    .AddJwtBearer(options =>
@@ -37,7 +37,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 //            ValidateAudience = true,
 //            ValidAudience = "AuClient",
 //            ValidateLifetime = true,
-//            IssuerSigningKey = GetSymmetricSecurityKey(),
+//            IssuerSigningKey = CustomerToken.GetSymmetricSecurityKey(),
 //            ValidateIssuerSigningKey = true,
 //        };
 //    });
@@ -45,16 +45,61 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddOptions<EmailServiceOptions>()
     .BindConfiguration("EmailService");
 builder.Services.AddOptions<TokenServiceOptions>()
-    .BindConfiguration("TokenService");
+    .BindConfiguration("Jwt");
 
 
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen(c => {
+builder.Services.AddSwaggerGen(c =>
+{
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ugolek API", Description = "", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme." +
+        " \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345abcdef\"",
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+      {
+        new OpenApiSecurityScheme
+        {
+          Reference = new OpenApiReference
+          {
+           Type = ReferenceType.SecurityScheme,
+           Id = "Bearer"
+          }
+        },
+        new string[] {}
+       }
+    });
 });
+
+builder.Services.AddAuthentication(option =>
+{
+option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = false,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])) //Configuration["JwtToken:SecretKey"]
+    };
+});
+
 
 { // Register Other Services
     builder.Services.AddScoped<IEmailSender, EmailSender>();
@@ -89,6 +134,9 @@ var app = builder.Build();
 app.UseSwagger();
 
 app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoalStore API V1"); });
+
+
+
 
 { // Endpoints mapping
     app.MapGet("/coals", (IRepository<Coal> repo) =>
@@ -152,7 +200,7 @@ app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoalStore
     });
 }
 
-//app.MapGet("/testjwt", [Authorize] () => new { message = "Hello World!" });
+app.MapGet("/testjwt", [Authorize] () => new { message = "Hello World!" });
 
 
 app.Run();

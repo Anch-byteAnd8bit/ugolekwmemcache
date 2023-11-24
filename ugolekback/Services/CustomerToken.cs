@@ -21,13 +21,13 @@ namespace Ugolek.Backend.Web.Services
     }
     public class CustomerToken: ICustomerToken
     {
-        public readonly TokenServiceOptions options;
+        public static TokenServiceOptions options;
         public CustomerToken(IOptions<TokenServiceOptions> options)
         {
-            this.options = options.Value;
+            CustomerToken.options = options.Value;
         }
 
-        public SymmetricSecurityKey GetSymmetricSecurityKey() =>
+        public static SymmetricSecurityKey GetSymmetricSecurityKey() =>
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.KEY));  //возвращает ключ безопасности, который применяется для генерации токена
 
         public string GenerateToken(string userAddress)
