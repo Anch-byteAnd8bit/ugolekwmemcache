@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
 using FluentValidation;
@@ -23,25 +24,6 @@ using ugolekback.OrderF;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAuthorization();
-
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//.AddJwtBearer(options => builder.Configuration.Bind("TokenService", options));
-
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddJwtBearer(options =>
-//    {
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuer = true,
-//            ValidIssuer = "AuServer",
-//            ValidateAudience = true,
-//            ValidAudience = "AuClient",
-//            ValidateLifetime = true,
-//            IssuerSigningKey = CustomerToken.GetSymmetricSecurityKey(),
-//            ValidateIssuerSigningKey = true,
-//        };
-//    });
-
 builder.Services.AddOptions<EmailServiceOptions>()
     .BindConfiguration("EmailService");
 builder.Services.AddOptions<TokenServiceOptions>()
@@ -96,7 +78,7 @@ option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])) //Configuration["JwtToken:SecretKey"]
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])) 
     };
 });
 
@@ -180,15 +162,21 @@ app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoalStore
         return Results.BadRequest();
     });
 
-    app.MapPost("/customers/orders", (
+    app.MapPost("/customers/orders", [Authorize] (
         [FromBody] CustomerOrderReq req,
         OrderService orderService,
         ICustomerToken customerToken,
-        IRepository<Customer> customers
+        IRepository<Customer> customers,
+        HttpContext co
     ) =>
-    {
-        //добавить что-то с токеном чб находить пользователя чб разрешать ему заказывать? 
-        Customer? customer = customers.GetCustomerById(1); // переделать
+    { 
+        var email = string.Empty;
+        if (co.User.Identity is ClaimsIdentity identity)
+        {
+            email = identity.FindFirst(ClaimTypes.Name).Value;
+        }
+        Customer? customer = customers.GetCustomerByEmail(email);
+
         if (customer != null)
         {
             orderService.GetAddress(customer.Id, req.settlement, req.street, req.house);
@@ -200,7 +188,17 @@ app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoalStore
     });
 }
 
-app.MapGet("/testjwt", [Authorize] () => new { message = "Hello World!" });
+//app.MapGet("/testjwt", [Authorize] () => new { message = "Hello World!" });
+//app.MapGet("/testjwt2", [Authorize] (IRepository<Customer> customers, HttpContext co) => 
+//{
+
+//    var email = string.Empty;
+//    if (co.User.Identity is ClaimsIdentity identity)
+//    {
+//        email = identity.FindFirst(ClaimTypes.Name).Value;
+//    }
+//    Customer cust = customers.GetCustomerByEmail(email);
+//    long userId = cust.Id; });
 
 
 app.Run();
