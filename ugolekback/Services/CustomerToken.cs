@@ -1,11 +1,8 @@
-﻿using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using ugolekback;
-using ugolekback.CustomerF;
 
 namespace Ugolek.Backend.Web.Services
 {
@@ -44,7 +41,6 @@ namespace Ugolek.Backend.Web.Services
             return new JwtSecurityTokenHandler().WriteToken(jwt);
 
         }
-
         public static string? GetCurrentEmail(System.Security.Principal.IIdentity? _identity)
         {
             // Убедимся, что это ClaimsIdentity, а не ClaimsPrincipal.

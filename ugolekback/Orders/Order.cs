@@ -1,10 +1,7 @@
-﻿using MailKit.Search;
-using Microsoft.Extensions.Caching.Memory;
-using Ugolek.Backend.Web.Services;
+﻿using Microsoft.Extensions.Caching.Memory;
 using ugolekback.Coals.Model;
 using ugolekback.Core;
 using ugolekback.CustomerF;
-using ugolekback.EmailF;
 
 namespace ugolekback.OrderF;
 
@@ -21,12 +18,10 @@ public class Order : IEntity
 public class CustomerOrderReq
 {
     public string settlement { get; init; }
-
     public string street { get; init; }
     public string house { get; init; }
     public List<ItemTemp> OrderItems { get; init; }
 }
-
 
 public class OrderService
 {
@@ -65,9 +60,9 @@ public class OrderService
     {
 
         ///создаем заказ
-        Order or = new Order
+        Order order = new Order
         {
-            Id = orders.GetLastId() + 1,
+            Id = Random.Shared.NextInt64(),
             OrderDate = DateTime.Now,
             OrderPrice = 0,
             Customer = customer,
@@ -79,21 +74,19 @@ public class OrderService
             //создаем подзаказ
             OrderItem oi = new OrderItem
             {
-                Id = orderItems.GetLastId() + 1,
+                Id = Random.Shared.NextInt64(),
                 // цена за тонну делить на 1000 кг умножить на кг
                 Price = coals.GetById(item.Id).Price / 1000 * item.Weight,
                 Weight = item.Weight,
                 Coal = coals.GetById(item.Id)
             };
             orderItems.Insert(oi);
-            or.OrderItems.Add(oi);
+            order.OrderItems.Add(oi);
         }
-        foreach (var item in or.OrderItems)
+        foreach (var item in order.OrderItems)
         {
-            or.OrderPrice += item.Price;
+            order.OrderPrice += item.Price;
         }
-        orders.Insert(or);
+        orders.Insert(order);
     }
-
-
 }

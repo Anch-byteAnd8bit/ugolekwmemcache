@@ -2,7 +2,6 @@
 using ugolekback.Core;
 using ugolekback.CustomerF;
 
-
 namespace Ugolek.Backend.Web.Services
 {
     public class CustomerVerificationInfo
@@ -42,7 +41,6 @@ namespace Ugolek.Backend.Web.Services
             memoryCache.Set(key, verificationInfo, cacheEntryOptions);
             return (newCode);
         }
-
         public bool VerifyCustomerCode(long customerId, string recivedCode)
         {
             if (customers.GetCustomerById(customerId) is { } customer)
@@ -52,9 +50,7 @@ namespace Ugolek.Backend.Web.Services
             }
             return false;
         }
-  
 
     }
-
 
 }

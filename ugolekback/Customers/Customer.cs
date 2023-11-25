@@ -38,7 +38,6 @@ public class CustomerService {
 
     private readonly ICustomerVerificationCodePersister customerVerificatioinCodePersister;
 
-    private readonly IMemoryCache memoryCache;
 
     public CustomerService(
         IRepository<Customer> customers,
@@ -49,7 +48,6 @@ public class CustomerService {
         this.customers = customers;
         this.emailSender = emailSender;
         this.customerVerificatioinCodePersister = customerVerificatioinCodePersister;
-        this.memoryCache = memoryCache;
     }
 
     public async Task SendToCustomerVerificationCode(string emailAddress, CancellationToken cancellation = default) {

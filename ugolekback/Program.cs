@@ -1,18 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.IO;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Security.Claims;
-using System.Text;
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 using Ugolek.Backend.Web.Services;
 using ugolekback;
 using ugolekback.Coals.Model;
@@ -29,9 +19,7 @@ builder.Services.AddOptions<EmailServiceOptions>()
 builder.Services.AddOptions<TokenServiceOptions>()
     .BindConfiguration("Jwt");
 
-
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(c =>
@@ -45,7 +33,8 @@ builder.Services.AddSwaggerGen(c =>
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
         Description = "JWT Authorization header using the Bearer scheme." +
-        " \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345abcdef\"",
+        " \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below." +
+        "\r\n\r\nExample: \"Bearer 12345abcdef\"",
     });
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -65,8 +54,8 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddAuthentication(option =>
 {
-option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 
 }).AddJwtBearer(options =>
 {
@@ -79,10 +68,8 @@ option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = CustomerToken.GetSymmetricSecurityKey(builder.Configuration["Jwt:Key"])
-        //new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])) 
     };
 });
-
 
 { // Register Other Services
     builder.Services.AddScoped<IEmailSender, EmailSender>();
@@ -118,73 +105,12 @@ app.UseSwagger();
 
 app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoalStore API V1"); });
 
+{
+    app.MapGetCoal();
+    app.MapPostCustomer();
+    app.MapPostCustomerVerification();
+    app.MapPostOrder();
 
-
-
-{ // Endpoints mapping
-    //app.MapGet("/coals", (IRepository<Coal> repo) =>
-    //{
-    //    return repo.GetMany();
-    //});
-    app.MapCoalEndpoints();
-
-    app.MapPost("/customers", async (
-        [FromBody] CustomerRegisterRequest req,
-        CustomerRegisterRequestValidator validator,
-        CustomerService services,
-        CancellationToken cancellationToken
-    ) =>
-    {
-        if (validator.Validate(req) is { IsValid: false, Errors: var errors })
-        {
-            return Results.BadRequest(errors);
-        }
-
-        await services.SendToCustomerVerificationCode(req.Address, cancellationToken);
-
-        return Results.Ok();
-    });
-
-    app.MapPost("/customers/verification", (
-        [FromBody] CustomerVerifyRequest req,
-        ICustomerVerificationCodePersister verification,
-        ICustomerToken customerToken,
-        IRepository<Customer> customers
-    ) =>
-    {
-        Customer? customer = customers.GetCustomerByEmail(req.Address);
-        if (customer != null)
-        {
-            const bool codeIsValid = true;
-            if (codeIsValid == verification.VerifyCustomerCode(customer.Id, req.Code))
-            {
-                return Results.Ok(customerToken.GenerateToken(req.Address));
-            }
-            return Results.BadRequest();
-        }
-        return Results.BadRequest();
-    });
-
-    app.MapPost("/customers/orders", [Authorize] (
-        [FromBody] CustomerOrderReq req,
-        OrderService orderService,
-        ICustomerToken customerToken,
-        IRepository<Customer> customers,
-        HttpContext co
-    ) =>
-    {
-        string? email = CustomerToken.GetCurrentEmail(co.User.Identity);
-        Customer? customer = customers.GetCustomerByEmail(email);
-
-        if (customer != null)
-        {
-            orderService.GetAddress(customer.Id, req.settlement, req.street, req.house);
-            orderService.AddOrder(req.OrderItems, customer);
-            return Results.Ok();
-
-        }
-        return Results.BadRequest();
-    });
 }
 app.Run();
 
