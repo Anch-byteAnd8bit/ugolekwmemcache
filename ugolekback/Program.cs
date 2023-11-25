@@ -78,7 +78,8 @@ option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])) 
+        IssuerSigningKey = CustomerToken.GetSymmetricSecurityKey(builder.Configuration["Jwt:Key"])
+        //new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])) 
     };
 });
 
@@ -121,10 +122,11 @@ app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoalStore
 
 
 { // Endpoints mapping
-    app.MapGet("/coals", (IRepository<Coal> repo) =>
-    {
-        return repo.GetMany();
-    });
+    //app.MapGet("/coals", (IRepository<Coal> repo) =>
+    //{
+    //    return repo.GetMany();
+    //});
+    app.MapCoalEndpoints();
 
     app.MapPost("/customers", async (
         [FromBody] CustomerRegisterRequest req,
@@ -170,12 +172,8 @@ app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoalStore
         IRepository<Customer> customers,
         HttpContext co
     ) =>
-    { 
-        var email = string.Empty;
-        if (co.User.Identity is ClaimsIdentity identity)
-        {
-            email = identity.FindFirst(ClaimTypes.Name).Value;
-        }
+    {
+        string? email = CustomerToken.GetCurrentEmail(co.User.Identity);
         Customer? customer = customers.GetCustomerByEmail(email);
 
         if (customer != null)
@@ -188,20 +186,6 @@ app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoalStore
         return Results.BadRequest();
     });
 }
-
-//app.MapGet("/testjwt", [Authorize] () => new { message = "Hello World!" });
-//app.MapGet("/testjwt2", [Authorize] (IRepository<Customer> customers, HttpContext co) => 
-//{
-
-//    var email = string.Empty;
-//    if (co.User.Identity is ClaimsIdentity identity)
-//    {
-//        email = identity.FindFirst(ClaimTypes.Name).Value;
-//    }
-//    Customer cust = customers.GetCustomerByEmail(email);
-//    long userId = cust.Id; });
-
-
 app.Run();
 
 public class CustomerRegisterRequest {

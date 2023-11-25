@@ -19,7 +19,7 @@ public class Customer : IEntity
 }
 
 public static class CustomerRepositoryExtensions {
-    public static Customer? GetCustomerByEmail(this IRepository<Customer> repo, string emailAddress) {
+    public static Customer? GetCustomerByEmail(this IRepository<Customer> repo, string? emailAddress) {
         return repo.Query()
             .SingleOrDefault(x => x.Email.Equals(emailAddress, StringComparison.InvariantCultureIgnoreCase));
     }

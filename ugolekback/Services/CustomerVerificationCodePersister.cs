@@ -13,7 +13,6 @@ namespace Ugolek.Backend.Web.Services
 
     public interface ICustomerVerificationCodePersister
     {
-        public string MakeKey(long customerId);
         public string GenerateCodeForCustomer(long customerId);
         public bool VerifyCustomerCode(long customerId, string recivedCode);
 
@@ -28,7 +27,7 @@ namespace Ugolek.Backend.Web.Services
             this.memoryCache = memoryCache;
             this.customers = customers;
         }
-        public string MakeKey(long customerId)
+        private string MakeKey(long customerId)
         {
             return $"customer-verify-{customerId}";
         } 

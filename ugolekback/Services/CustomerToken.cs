@@ -28,8 +28,8 @@ namespace Ugolek.Backend.Web.Services
             CustomerToken.options = options.Value;
         }
 
-        public static SymmetricSecurityKey GetSymmetricSecurityKey() =>
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.KEY));  //возвращает ключ безопасности, который применяется для генерации токена
+        public static SymmetricSecurityKey GetSymmetricSecurityKey(string key) =>
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));  //возвращает ключ безопасности, который применяется для генерации токена
 
         public string GenerateToken(string userAddress)
         {
@@ -39,10 +39,21 @@ namespace Ugolek.Backend.Web.Services
                     audience: options.AUDIENCE,
                     claims: claims,
                     expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(10)), 
-                    signingCredentials: new SigningCredentials(GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+                    signingCredentials: new SigningCredentials(GetSymmetricSecurityKey(options.KEY), SecurityAlgorithms.HmacSha256));
 
             return new JwtSecurityTokenHandler().WriteToken(jwt);
 
+        }
+
+        public static string? GetCurrentEmail(System.Security.Principal.IIdentity? _identity)
+        {
+            // Убедимся, что это ClaimsIdentity, а не ClaimsPrincipal.
+            if (_identity is ClaimsIdentity identity)
+            {
+                string? email = identity.FindFirst(ClaimTypes.Name)?.Value;
+                return email;
+            }
+            return null;
         }
     }
 
