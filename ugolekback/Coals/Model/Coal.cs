@@ -1,6 +1,6 @@
-﻿using ugolekback.Core;
+﻿using Ugolek.Backend.Web.Core;
 
-namespace ugolekback.Coals.Model;
+namespace Ugolek.Backend.Web.Coals.Model;
 
 public class Coal : IEntity {
     public long Id { get; set; } 

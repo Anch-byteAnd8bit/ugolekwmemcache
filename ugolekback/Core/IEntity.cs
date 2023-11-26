@@ -1,4 +1,4 @@
-﻿namespace ugolekback.Core;
+﻿namespace Ugolek.Backend.Web.Core;
 
 public interface IEntity
 {

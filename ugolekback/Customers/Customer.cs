@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using Ugolek.Backend.Web.Core;
 using Ugolek.Backend.Web.Services;
-using ugolekback.Core;
-using ugolekback.EmailF;
 
-namespace ugolekback.CustomerF;
+namespace Ugolek.Backend.Web.Customers;
 
 public class Customer : IEntity 
 {

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Text;
 
-namespace ugolekback.EmailF;
+namespace Ugolek.Backend.Web.Services;
 
 public interface IEmailSender
 {

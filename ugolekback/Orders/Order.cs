@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
-using ugolekback.Coals.Model;
-using ugolekback.Core;
-using ugolekback.CustomerF;
+using Ugolek.Backend.Web.Coals.Model;
+using Ugolek.Backend.Web.Core;
+using Ugolek.Backend.Web.Customers;
 
-namespace ugolekback.OrderF;
+namespace Ugolek.Backend.Web.Orders;
 
 public class Order : IEntity
 {

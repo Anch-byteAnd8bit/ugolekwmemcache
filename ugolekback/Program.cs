@@ -1,15 +1,14 @@
-﻿using FluentValidation;
+﻿using System.Reflection;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Reflection;
+using Ugolek.Backend.Web;
+using Ugolek.Backend.Web.Coals.Model;
+using Ugolek.Backend.Web.Core;
+using Ugolek.Backend.Web.Customers;
+using Ugolek.Backend.Web.Orders;
 using Ugolek.Backend.Web.Services;
-using ugolekback;
-using ugolekback.Coals.Model;
-using ugolekback.Core;
-using ugolekback.CustomerF;
-using ugolekback.EmailF;
-using ugolekback.OrderF;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,22 +32,22 @@ builder.Services.AddSwaggerGen(c =>
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
         Description = "JWT Authorization header using the Bearer scheme." +
-        " \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below." +
-        "\r\n\r\nExample: \"Bearer 12345abcdef\"",
+                      " \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below." +
+                      "\r\n\r\nExample: \"Bearer 12345abcdef\"",
     });
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-      {
-        new OpenApiSecurityScheme
         {
-          Reference = new OpenApiReference
-          {
-           Type = ReferenceType.SecurityScheme,
-           Id = "Bearer"
-          }
-        },
-        new string[] {}
-       }
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
     });
 });
 
@@ -105,29 +104,25 @@ app.UseSwagger();
 
 app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoalStore API V1"); });
 
-{
-    app.MapGetCoal();
-    app.MapPostCustomer();
-    app.MapPostCustomerVerification();
-    app.MapPostOrder();
+app.MarUgolekApiEndpoints();
 
-}
 app.Run();
 
-public class CustomerRegisterRequest {
-    public string Address { get; init; }
-}
+namespace Ugolek.Backend.Web {
+    public class CustomerRegisterRequest {
+        public string Address { get; init; }
+    }
 
-public class CustomerRegisterRequestValidator : AbstractValidator<CustomerRegisterRequest> {
-    public CustomerRegisterRequestValidator() {
-        RuleFor(x => x.Address)
-            .NotEmpty().MaximumLength(256).EmailAddress();
+    public class CustomerRegisterRequestValidator : AbstractValidator<CustomerRegisterRequest> {
+        public CustomerRegisterRequestValidator() {
+            RuleFor(x => x.Address)
+                .NotEmpty().MaximumLength(256).EmailAddress();
+        }
+    }
+
+    public class CustomerVerifyRequest {
+        public string Address { get; init; }
+
+        public string Code { get; init; }
     }
 }
-
-public class CustomerVerifyRequest {
-    public string Address { get; init; }
-
-    public string Code { get; init; }
-}
-
