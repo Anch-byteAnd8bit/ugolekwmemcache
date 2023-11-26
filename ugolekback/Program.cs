@@ -4,17 +4,22 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Ugolek.Backend.Web;
-using Ugolek.Backend.Web.Coals.Model;
+using Ugolek.Backend.Web.Application.Features.Coals;
+using Ugolek.Backend.Web.Application.Features.Customers;
+using Ugolek.Backend.Web.Application.Features.Orders;
+using Ugolek.Backend.Web.Application.Services;
+using Ugolek.Backend.Web.Configuration.Customers;
+using Ugolek.Backend.Web.Configuration.Services;
 using Ugolek.Backend.Web.Core;
-using Ugolek.Backend.Web.Customers;
-using Ugolek.Backend.Web.Orders;
-using Ugolek.Backend.Web.Services;
+using Ugolek.Backend.Web.Presentation;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAuthorization();
+
 builder.Services.AddOptions<EmailServiceOptions>()
     .BindConfiguration("EmailService");
+
 builder.Services.AddOptions<TokenServiceOptions>()
     .BindConfiguration("Jwt");
 
@@ -108,21 +113,4 @@ app.MarUgolekApiEndpoints();
 
 app.Run();
 
-namespace Ugolek.Backend.Web {
-    public class CustomerRegisterRequest {
-        public string Address { get; init; }
-    }
-
-    public class CustomerRegisterRequestValidator : AbstractValidator<CustomerRegisterRequest> {
-        public CustomerRegisterRequestValidator() {
-            RuleFor(x => x.Address)
-                .NotEmpty().MaximumLength(256).EmailAddress();
-        }
-    }
-
-    public class CustomerVerifyRequest {
-        public string Address { get; init; }
-
-        public string Code { get; init; }
-    }
-}
+namespace Ugolek.Backend.Web { }

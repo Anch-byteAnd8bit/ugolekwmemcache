@@ -2,13 +2,9 @@
 using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Text;
+using Ugolek.Backend.Web.Application.Services;
 
-namespace Ugolek.Backend.Web.Services;
-
-public interface IEmailSender
-{
-    Task SendEmailAsync(string email, string message, CancellationToken cancellation = default);
-}
+namespace Ugolek.Backend.Web.Configuration.Services;
 
 public class EmailSender : IEmailSender {
     private readonly EmailServiceOptions options;

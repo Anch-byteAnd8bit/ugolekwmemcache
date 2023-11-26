@@ -1,4 +1,4 @@
-﻿namespace Ugolek.Backend.Web;
+﻿namespace Ugolek.Backend.Web.Configuration.Services;
 
 public class EmailServiceOptions
 {

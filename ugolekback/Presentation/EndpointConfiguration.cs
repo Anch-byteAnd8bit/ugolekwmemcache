@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Ugolek.Backend.Web.Coals.Model;
+using Ugolek.Backend.Web.Application.Features.Coals;
+using Ugolek.Backend.Web.Application.Features.Customers;
+using Ugolek.Backend.Web.Application.Features.Orders;
+using Ugolek.Backend.Web.Application.Services;
 using Ugolek.Backend.Web.Core;
-using Ugolek.Backend.Web.Customers;
-using Ugolek.Backend.Web.Orders;
 
-namespace Ugolek.Backend.Web.Services; 
+namespace Ugolek.Backend.Web.Presentation; 
 
 public static class EndpointConfiguration {
     public static void MarUgolekApiEndpoints(this WebApplication app) {

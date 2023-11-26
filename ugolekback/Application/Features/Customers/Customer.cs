@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using Ugolek.Backend.Web.Application.Services;
 using Ugolek.Backend.Web.Core;
-using Ugolek.Backend.Web.Services;
 
-namespace Ugolek.Backend.Web.Customers;
+namespace Ugolek.Backend.Web.Application.Features.Customers;
 
 public class Customer : IEntity 
 {

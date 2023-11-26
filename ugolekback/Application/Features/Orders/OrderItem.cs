@@ -1,7 +1,7 @@
-﻿using Ugolek.Backend.Web.Coals.Model;
+﻿using Ugolek.Backend.Web.Application.Features.Coals;
 using Ugolek.Backend.Web.Core;
 
-namespace Ugolek.Backend.Web.Orders;
+namespace Ugolek.Backend.Web.Application.Features.Orders;
 
 public record OrderItem: IEntity
 {

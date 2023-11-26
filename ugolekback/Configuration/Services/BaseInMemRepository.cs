@@ -1,4 +1,7 @@
-﻿namespace Ugolek.Backend.Web.Core;
+﻿using Ugolek.Backend.Web.Application.Services;
+using Ugolek.Backend.Web.Core;
+
+namespace Ugolek.Backend.Web.Configuration.Services;
 
 public class BaseInMemRepository<T> : IRepository<T> where T : class, IEntity {
     private readonly ICollection<T> entites;

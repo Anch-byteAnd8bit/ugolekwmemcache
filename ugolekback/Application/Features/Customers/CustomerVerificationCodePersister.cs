@@ -1,26 +1,14 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
-using Ugolek.Backend.Web.Core;
-using Ugolek.Backend.Web.Customers;
+using Ugolek.Backend.Web.Application.Features.Customers;
+using Ugolek.Backend.Web.Application.Services;
 
-namespace Ugolek.Backend.Web.Services; 
+namespace Ugolek.Backend.Web.Configuration.Customers;
 
-public class CustomerVerificationInfo
-{
-    public string VerificationCode { get; set; }
-    public long CustomerId { get; set; }
-}
-
-public interface ICustomerVerificationCodePersister
-{
-    public string GenerateCodeForCustomer(long customerId);
-    public bool VerifyCustomerCode(long customerId, string recivedCode);
-
-}
-
-public class CustomerVerificationCodePersister : ICustomerVerificationCodePersister
-{
+public class CustomerVerificationCodePersister : ICustomerVerificationCodePersister {
     private readonly IMemoryCache memoryCache;
+
     private readonly IRepository<Customer> customers;
+
     public CustomerVerificationCodePersister(IMemoryCache memoryCache, IRepository<Customer> customers)
     {
         this.memoryCache = memoryCache;

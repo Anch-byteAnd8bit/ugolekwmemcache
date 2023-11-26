@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
-using Ugolek.Backend.Web.Coals.Model;
+using Ugolek.Backend.Web.Application.Features.Coals;
+using Ugolek.Backend.Web.Application.Features.Customers;
+using Ugolek.Backend.Web.Application.Services;
 using Ugolek.Backend.Web.Core;
-using Ugolek.Backend.Web.Customers;
 
-namespace Ugolek.Backend.Web.Orders;
+namespace Ugolek.Backend.Web.Application.Features.Orders;
 
 public class Order : IEntity
 {
