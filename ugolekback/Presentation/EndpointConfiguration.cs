@@ -4,6 +4,7 @@ using Ugolek.Backend.Web.Application.Features.Coals;
 using Ugolek.Backend.Web.Application.Features.Customers;
 using Ugolek.Backend.Web.Application.Features.Orders;
 using Ugolek.Backend.Web.Application.Services;
+using Ugolek.Backend.Web.Application.Services.CustomerTokens;
 using Ugolek.Backend.Web.Core;
 
 namespace Ugolek.Backend.Web.Presentation; 
@@ -50,16 +51,17 @@ public static class EndpointConfiguration {
         IRepository<Customer> customers,
         HttpContext context
     ) {
-        string? email = CustomerToken.GetCurrentEmail(context.User.Identity);
-        Customer? customer = customers.GetCustomerByEmail(email);
+        var email = CustomerToken.GetCurrentEmail(context.User.Identity);
 
-        if (customer != null) {
-            orderService.GetAddress(customer.Id, req.settlement, req.street, req.house);
-            orderService.AddOrder(req.OrderItems, customer);
-            return Results.Ok();
+        if (customers.GetCustomerByEmail(email) is not { } customer) {
+            return Results.BadRequest();
         }
 
-        return Results.BadRequest();
+        customer.ProvideAddress(req.Settlement, req.Street, req.House);
+
+        orderService.PlaceOrder(req.OrderItems, customer);
+
+        return Results.Ok();
     }
 
     private static async Task<IResult> CustomerRegisterAsync(

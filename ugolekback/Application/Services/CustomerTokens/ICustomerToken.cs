@@ -1,4 +1,4 @@
-﻿namespace Ugolek.Backend.Web.Application.Services;
+﻿namespace Ugolek.Backend.Web.Application.Services.CustomerTokens;
 
 public interface ICustomerToken
 {

@@ -14,6 +14,7 @@ public class CustomerVerificationCodePersister : ICustomerVerificationCodePersis
         this.memoryCache = memoryCache;
         this.customers = customers;
     }
+
     private string MakeKey(long customerId)
     {
         return $"customer-verify-{customerId}";
@@ -29,14 +30,14 @@ public class CustomerVerificationCodePersister : ICustomerVerificationCodePersis
         memoryCache.Set(key, verificationInfo, cacheEntryOptions);
         return (newCode);
     }
+
     public bool VerifyCustomerCode(long customerId, string recivedCode)
     {
-        if (customers.GetCustomerById(customerId) is { } customer)
+        if (customers.GetById(customerId) is { } customer)
         {
             var verificationInfo = memoryCache.Get<CustomerVerificationInfo>(MakeKey(customerId));
             return recivedCode == verificationInfo?.VerificationCode;
         }
         return false;
     }
-
 }

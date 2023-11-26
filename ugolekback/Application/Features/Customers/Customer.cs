@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using Ugolek.Backend.Web.Application.Services;
-using Ugolek.Backend.Web.Core;
+﻿using Ugolek.Backend.Web.Core;
 
 namespace Ugolek.Backend.Web.Application.Features.Customers;
 
@@ -15,46 +13,14 @@ public class Customer : IEntity
     public string? Street { get; set; }
 
     public string? House { get; set; }
-}
 
-public static class CustomerRepositoryExtensions {
-    public static Customer? GetCustomerByEmail(this IRepository<Customer> repo, string? emailAddress) {
-        return repo.Query()
-            .SingleOrDefault(x => x.Email.Equals(emailAddress, StringComparison.InvariantCultureIgnoreCase));
+    public void ProvideAddress(string city, string street, string house) {
+        ArgumentException.ThrowIfNullOrEmpty(city);
+        ArgumentException.ThrowIfNullOrEmpty(street);
+        ArgumentException.ThrowIfNullOrEmpty(house);
+
+        City = city;
+        Street = street;
+        House = house;
     }
-    public static Customer? GetCustomerById(this IRepository<Customer> repo, long customerId)
-    {
-        return repo.Query()
-            .SingleOrDefault(x => x.Id.Equals(customerId));
-    }
-
-}
-
-public class CustomerService {
-    private readonly IRepository<Customer> customers;
-
-    private readonly IEmailSender emailSender;
-
-    private readonly ICustomerVerificationCodePersister customerVerificatioinCodePersister;
-
-
-    public CustomerService(
-        IRepository<Customer> customers,
-        IEmailSender emailSender,
-        ICustomerVerificationCodePersister customerVerificatioinCodePersister,
-        IMemoryCache memoryCache
-    ) {
-        this.customers = customers;
-        this.emailSender = emailSender;
-        this.customerVerificatioinCodePersister = customerVerificatioinCodePersister;
-    }
-
-    public async Task SendToCustomerVerificationCode(string emailAddress, CancellationToken cancellation = default) {
-        if (customers.GetCustomerByEmail(emailAddress) is not {  } customer) {
-            customer = customers.Insert(new() {Id = Random.Shared.NextInt64(), Email = emailAddress,});
-        }
-        var verificationCode = customerVerificatioinCodePersister.GenerateCodeForCustomer(customer.Id);
-        await emailSender.SendEmailAsync(customer.Email, $"Код подтверждения: {verificationCode}", cancellation);
-    }
-
 }

@@ -8,6 +8,7 @@ using Ugolek.Backend.Web.Application.Features.Coals;
 using Ugolek.Backend.Web.Application.Features.Customers;
 using Ugolek.Backend.Web.Application.Features.Orders;
 using Ugolek.Backend.Web.Application.Services;
+using Ugolek.Backend.Web.Application.Services.CustomerTokens;
 using Ugolek.Backend.Web.Configuration.Customers;
 using Ugolek.Backend.Web.Configuration.Services;
 using Ugolek.Backend.Web.Core;
@@ -29,6 +30,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ugolek API", Description = "", Version = "v1" });
+
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
         Name = "Authorization",
@@ -40,11 +42,11 @@ builder.Services.AddSwaggerGen(c =>
                       " \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below." +
                       "\r\n\r\nExample: \"Bearer 12345abcdef\"",
     });
+
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-            new OpenApiSecurityScheme
-            {
+            new OpenApiSecurityScheme {
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
@@ -56,24 +58,32 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.AddAuthentication(option =>
-{
-    option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+builder.Services
+    .AddAuthentication(option => {
+        option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 
-}).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = false,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = CustomerToken.GetSymmetricSecurityKey(builder.Configuration["Jwt:Key"])
-    };
-});
+    })
+    .AddJwtBearer(options => {
+        var tokenOptions = builder.Configuration.GetSection("Jwt").Get<TokenServiceOptions>();
+
+        if (tokenOptions is not { }) {
+            throw new ArgumentException("Configuration of JWT token is invalid");
+        }
+
+        options.TokenValidationParameters = new TokenValidationParameters {
+            ValidateLifetime = false,
+
+            ValidateAudience = true,
+            ValidAudience = tokenOptions.Audience,
+
+            ValidateIssuer = true,
+            ValidIssuer = tokenOptions.Issuer,
+
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = tokenOptions.SecurityKey
+        };
+    });
 
 { // Register Other Services
     builder.Services.AddScoped<IEmailSender, EmailSender>();
@@ -112,5 +122,3 @@ app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoalStore
 app.MarUgolekApiEndpoints();
 
 app.Run();
-
-namespace Ugolek.Backend.Web { }
