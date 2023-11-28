@@ -15,7 +15,7 @@ public class OrderService {
     }
 
     /// <summary>
-    /// Оформление/размещение закзаза клиента.
+    /// Оформление/размещение заказа клиента.
     /// </summary>
     public void PlaceOrder(List<OrderItemDto> orderItems, Customer customer) {
         var coalsInOrder = _coals.Query().Where(x => orderItems.Select(y => y.Id).Contains(x.Id)).ToList();
@@ -37,5 +37,14 @@ public class OrderService {
             order.OrderPrice += item.Price;
         }
         _orders.Insert(order);
+    }
+
+    /// <summary>
+    /// Получение истории заказов клиента.
+    /// </summary>
+    public List<Order> GetCustomerOrders(string email)
+    {
+        var customerOrders = _orders.Query().Where(x => x.Customer.Email == email).ToList();
+        return customerOrders;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Ugolek.Backend.Web.Application.Features.Coals;
 using Ugolek.Backend.Web.Application.Features.Customers;
@@ -7,17 +8,18 @@ using Ugolek.Backend.Web.Application.Services;
 using Ugolek.Backend.Web.Application.Services.CustomerTokens;
 using Ugolek.Backend.Web.Core;
 
-namespace Ugolek.Backend.Web.Presentation; 
+namespace Ugolek.Backend.Web.Presentation;
 
 public static class EndpointConfiguration {
     public static void MarUgolekApiEndpoints(this WebApplication app) {
         app.MapGet("/coals", CoalGetMany);
-        
+
         app.MapPost("/customers/verification", CustomerVerify);
 
         app.MapPost("/customers", CustomerRegisterAsync);
-        
+
         app.MapPost("/customers/orders", CustomerOrdersGetMany);
+        app.MapGet("/orders", CustomerOrdersGiveMany);
     }
 
     private static ICollection<Coal> CoalGetMany(IRepository<Coal> repo) {
@@ -25,7 +27,7 @@ public static class EndpointConfiguration {
     }
 
     private static IResult CustomerVerify(
-        [FromBody] CustomerVerifyRequest req, 
+        [FromBody] CustomerVerifyRequest req,
         ICustomerVerificationCodePersister verification,
         ICustomerToken customerToken,
         IRepository<Customer> customers
@@ -47,7 +49,7 @@ public static class EndpointConfiguration {
     private static IResult CustomerOrdersGetMany(
         [FromBody] CustomerOrderReq req,
         OrderService orderService,
-        ICustomerToken customerToken,
+        //CustomerToken customerToken,
         IRepository<Customer> customers,
         HttpContext context
     ) {
@@ -56,12 +58,27 @@ public static class EndpointConfiguration {
         if (customers.GetCustomerByEmail(email) is not { } customer) {
             return Results.BadRequest();
         }
-
         customer.ProvideAddress(req.Settlement, req.Street, req.House);
-
         orderService.PlaceOrder(req.OrderItems, customer);
 
         return Results.Ok();
+    }
+
+    [Authorize]
+    private static ICollection<Order> CustomerOrdersGiveMany(
+        //[FromBody] CustomerOrderReq req,
+        OrderService orderService,
+        //ICustomerToken customerToken,
+        IRepository<Customer> customers,
+        HttpContext context
+        )
+    {
+        var email = CustomerToken.GetCurrentEmail(context.User.Identity);
+        if (customers.GetCustomerByEmail(email) is not { } customer)
+        {
+            return null;
+        }
+        return orderService.GetCustomerOrders(email);
     }
 
     private static async Task<IResult> CustomerRegisterAsync(

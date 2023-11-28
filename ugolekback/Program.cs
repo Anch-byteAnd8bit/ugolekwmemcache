@@ -1,9 +1,8 @@
-﻿using System.Reflection;
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Ugolek.Backend.Web;
+using System.Reflection;
 using Ugolek.Backend.Web.Application.Features.Coals;
 using Ugolek.Backend.Web.Application.Features.Customers;
 using Ugolek.Backend.Web.Application.Features.Orders;
@@ -11,7 +10,6 @@ using Ugolek.Backend.Web.Application.Services;
 using Ugolek.Backend.Web.Application.Services.CustomerTokens;
 using Ugolek.Backend.Web.Configuration.Customers;
 using Ugolek.Backend.Web.Configuration.Services;
-using Ugolek.Backend.Web.Core;
 using Ugolek.Backend.Web.Presentation;
 
 var builder = WebApplication.CreateBuilder(args);
