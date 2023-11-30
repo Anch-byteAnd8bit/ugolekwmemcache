@@ -23,7 +23,8 @@ public record OrderItem : IEntity {
         return new OrderItem {
             Price = coal.Price * weight,
             Weight = weight,
-            Coal = coal
+            Coal = coal,
+            Id = Random.Shared.NextInt64()
         };
     }
 }

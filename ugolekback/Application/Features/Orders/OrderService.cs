@@ -22,6 +22,7 @@ public class OrderService {
 
         Order order = new Order {
             OrderDate = DateTime.Now,
+            Id = Random.Shared.NextInt64(),
             OrderPrice = 0,
             Customer = customer,
             OrderItems = orderItems
