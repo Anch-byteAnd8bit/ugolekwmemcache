@@ -66,19 +66,18 @@ public static class EndpointConfiguration {
 
     [Authorize]
     private static ICollection<Order> CustomerOrdersGiveMany(
-        //[FromBody] CustomerOrderReq req,
         OrderService orderService,
-        //ICustomerToken customerToken,
         IRepository<Customer> customers,
         HttpContext context
         )
     {
         var email = CustomerToken.GetCurrentEmail(context.User.Identity);
-        if (customers.GetCustomerByEmail(email) is not { } customer)
+        if (customers.GetCustomerByEmail(email) is { } customer)
         {
-            return null;
+            return orderService.GetCustomerOrders(email);
         }
-        return orderService.GetCustomerOrders(email);
+        return null;
+        
     }
 
     private static async Task<IResult> CustomerRegisterAsync(

@@ -5,6 +5,11 @@ VisualStudioVersion = 17.7.34202.233
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ugolek.Backend.Web", "Ugolek.Backend.Web.csproj", "{9F76D1E0-9B8C-4C4E-A17A-FF791B5BA766}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestOrdersPost", "..\TestOrdersPost\TestOrdersPost.csproj", "{D36D163D-E594-4293-9769-571A26FA88CB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9F76D1E0-9B8C-4C4E-A17A-FF791B5BA766} = {9F76D1E0-9B8C-4C4E-A17A-FF791B5BA766}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +20,10 @@ Global
 		{9F76D1E0-9B8C-4C4E-A17A-FF791B5BA766}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9F76D1E0-9B8C-4C4E-A17A-FF791B5BA766}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9F76D1E0-9B8C-4C4E-A17A-FF791B5BA766}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D36D163D-E594-4293-9769-571A26FA88CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D36D163D-E594-4293-9769-571A26FA88CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D36D163D-E594-4293-9769-571A26FA88CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D36D163D-E594-4293-9769-571A26FA88CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

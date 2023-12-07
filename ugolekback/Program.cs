@@ -120,3 +120,4 @@ app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoalStore
 app.MarUgolekApiEndpoints();
 
 app.Run();
+public partial class Program { }
